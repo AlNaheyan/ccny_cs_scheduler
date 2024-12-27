@@ -14,7 +14,8 @@ def get_eligible_courses(completed_courses,all_courses):
     for course in all_courses:
         prereqs = course["prerequisites"]
         if all(prereq in completed_courses for prereq in prereqs):
-            eligible.append(course)
+            if course["code"] not in completed_courses:
+                eligible.append(course)
     return eligible
 
 @app.route('/api/courses', methods=['GET'])

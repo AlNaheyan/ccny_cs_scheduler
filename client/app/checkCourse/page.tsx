@@ -55,7 +55,13 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white p-6 text-black">
+    <div className="min-h-screen bg-white p-20 px-80 text-black">
+      <div className="mb-10">
+        <h2 className="text-5xl font-semibold">
+          OnMyTrack --{'>'}
+        </h2>
+      </div>
+      
       <div className="bg-white border border-solid rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-4">Select Completed Courses</h2>
         <ul className="space-y-2">
@@ -85,12 +91,13 @@ export default function Home() {
       </div>
 
       {eligibleCourses.length > 0 && (
-        <div className="mt-6 bg-white shadow-md rounded-lg p-6">
+        <div className="mt-6 bg-white border border-solid rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Eligible Courses</h2>
           <ul className="space-y-2">
             {eligibleCourses.map((course) => (
               <li key={course.code} className="text-gray-700">
-                {course.name}
+                <span className="font-bold">{course.code}</span>
+                <span>: {course.name}</span>
               </li>
             ))}
           </ul>
