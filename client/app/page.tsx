@@ -1,7 +1,7 @@
 export default function Home() {
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 text-black flex items-center">
+    <div className="min-h-screen bg-white p-6 text-black flex items-center">
       <div className="">
         <h2 className="text-6xl font-bold ml-28">
           Plan Your Next Semester!

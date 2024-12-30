@@ -9,13 +9,14 @@ def load_courses():
     with open("courses.json", "r") as f:
         return json.load(f)
     
-def get_eligible_courses(completed_courses,all_courses):
+def get_eligible_courses(completed_courses,all_courses, category=None):
     eligible = []
     for course in all_courses:
         prereqs = course["prerequisites"]
         if all(prereq in completed_courses for prereq in prereqs):
             if course["code"] not in completed_courses:
-                eligible.append(course)
+                if not category or course["category"] == category:
+                    eligible.append(course)
     return eligible
 
 @app.route('/api/courses', methods=['GET'])
@@ -31,8 +32,9 @@ def get_eligible():
     try:
         data = request.json
         completed_courses = data.get("completed_courses", [])
+        category = data.get("category")
         all_courses = load_courses()
-        eligible = get_eligible_courses(completed_courses, all_courses)
+        eligible = get_eligible_courses(completed_courses, all_courses, category)
         return jsonify(eligible)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

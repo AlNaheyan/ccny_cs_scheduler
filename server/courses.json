@@ -2,121 +2,145 @@
     {
         "code": "ENGL11000",
         "name": "Freshman Composition",
-        "prerequisites": []
+        "prerequisites": [],
+        "category": "English"
     },
     {
         "code": "ENGL21007",
         "name": "Writing for Engineering",
-        "prerequisites": ["ENGL11000"]
+        "prerequisites": ["ENGL11000"],
+        "category": "English"
     },
     {
         "code": "MATH20100",
         "name": "Calculus I",
-        "prerequisites": ["MATH19500"]
+        "prerequisites": ["MATH19500"],
+        "category": "Mathematics"
     },
     {
         "code": "MATH21200",
         "name": "Calculus II",
-        "prerequisites": ["MATH20100"]
+        "prerequisites": ["MATH20100"],
+        "category": "Mathematics"
     },
     {
         "code": "MATH21300",
         "name": "Calculus III",
-        "prerequisites": ["MATH21200"]
+        "prerequisites": ["MATH21200"],
+        "category": "Mathematics"
     },
     {
         "code": "MATH34600",
         "name": "Elements of Linear Algebra",
-        "prerequisites": ["MATH21200"]
+        "prerequisites": ["MATH21200"],
+        "category": "Mathematics"
     },
     {
         "code": "CSC10300",
         "name": "Intro to Computing for Majors",
-        "prerequisites": ["MATH19500"]
+        "prerequisites": ["MATH19500"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC10400",
         "name": "Discrete Math Structure",
-        "prerequisites": ["MATH20100"]
+        "prerequisites": ["MATH20100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC21100",
         "name": "Fundation of Computer Systems",
-        "prerequisites": ["CSC10300"]
+        "prerequisites": ["CSC10300"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC21200",
         "name": "Data Structures",
-        "prerequisites": ["CSC10300", "CSC10400"]
+        "prerequisites": ["CSC10300", "CSC10400"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC21700",
         "name": "Probability & Statistics for Computer Science",
-        "prerequisites": ["CSC10300", "CSC10400", "MATH20100"]
+        "prerequisites": ["CSC10300", "CSC10400", "MATH20100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC22000",
         "name": "Algorithms",
-        "prerequisites": ["CSC21200"]
+        "prerequisites": ["CSC21200"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC22100",
         "name": "Software Design Lab",
-        "prerequisites": ["CSC21200", "ENGL21007"]
+        "prerequisites": ["CSC21200", "ENGL21007"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC11300",
         "name": "Programming Languange",
-        "prerequisites": ["CSC10300"]
+        "prerequisites": ["CSC10300"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC30400",
         "name": "Theoretical Computer Science",
-        "prerequisites": ["CSC22000"]
+        "prerequisites": ["CSC22000"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC30100",
         "name": "Numerical Issues in Scitific Programming",
-        "prerequisites": ["CSC21700", "CSC22000", "MATH21300", "MATH34600"]
+        "prerequisites": ["CSC21700", "CSC22000", "MATH21300", "MATH34600"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC38000",
         "name": "Computer Security",
-        "prerequisites": ["CSC21100", "CSC22000"]
+        "prerequisites": ["CSC21100", "CSC22000"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC33500",
         "name": "Programming Language Paradigms",
-        "prerequisites": ["CSC22000", "CSC22100"]
+        "prerequisites": ["CSC22000", "CSC22100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC32200",
         "name": "Software Engineering",
-        "prerequisites": ["CSC22000", "CSC22100"]
+        "prerequisites": ["CSC22000", "CSC22100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC33600",
         "name": "Introduction to Database Systems",
-        "prerequisites": ["CSC22000", "ENGL21007"]
+        "prerequisites": ["CSC22000", "ENGL21007"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC33200",
         "name": "Operating Systems",
-        "prerequisites": ["CSC22000", "CSC22100"]
+        "prerequisites": ["CSC22000", "CSC22100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC34200",
         "name": "Computer Organization",
-        "prerequisites": ["CSC21100"]
+        "prerequisites": ["CSC21100"],
+        "category": "Computer Science"
     },
     {
         "code": "CSC34300",
         "name": "Computer Organization Lab",
-        "prerequisites": ["CSC34300"]
+        "prerequisites": ["CSC34300"],
+        "category": "Computer Science"
     },
     {
         "code": "ENGR27600",
         "name": "Engineering Economics",
-        "prerequisites": ["MATH20100"]
+        "prerequisites": ["MATH20100"],
+        "category": "Engineering"
     }
 ]
