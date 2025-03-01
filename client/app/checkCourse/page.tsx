@@ -1,6 +1,10 @@
 'use client'
 
+import Nav from '../components/Nav'
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Course {
   code: string;
@@ -10,6 +14,15 @@ interface Course {
 }
 
 export default function Home() {
+  const { isSignedIn } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push('/sign-in');
+    }
+  }, [isSignedIn, router]);
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [completed, setCompleted] = useState<string[]>([]);
   const [eligibleCourses, setEligibleCourses] = useState<Course[]>([]);
@@ -22,8 +35,7 @@ export default function Home() {
       const data = await res.json();
       if (Array.isArray(data)) {
         setCourses(data);
-        const uniqueCategories = Array.from(new Set(data.map((course) => course.category)));
-        setCategories(uniqueCategories);
+        setCategories(Array.from(new Set(data.map((course) => course.category))));
       } else {
         console.error("API returned invalid data:", data);
         setCourses([]);
@@ -65,15 +77,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white p-20 pt-15 text-black">
-      <div className="mb-10">
-        <h2 className="text-5xl font-semibold">
-          OnMyTrack --{'>'}
-        </h2>
-      </div>
-
-      {/* main Container */}
+      <Nav />
       <div className="flex space-x-10">
-        {/* left secionn*/}
         <div className="w-1/2 bg-white rounded-lg p-5">
           <h2 className="text-2xl font-semibold mb-4">Select Completed Courses</h2>
           <ul className="space-y-4">
@@ -84,16 +89,13 @@ export default function Home() {
                   {courses
                     .filter((course) => course.category === category)
                     .map((course) => (
-                      <li key={course.code}>
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            onChange={() => toggleCourse(course.code)}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="font-bold text-black/80">{course.code}:</span>
-                          <span className="text-black/80">{course.name}</span>
-                        </label>
+                      <li key={course.code} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={completed.includes(course.code)}
+                          onCheckedChange={() => toggleCourse(course.code)}
+                        />
+                        <span className="font-bold text-black/80">{course.code}:</span>
+                        <span className="text-black/80">{course.name}</span>
                       </li>
                     ))}
                 </ul>
@@ -101,15 +103,11 @@ export default function Home() {
             ))}
           </ul>
         </div>
-
-        {/* eligible curses section */}
         <div className="w-1/2 bg-white rounded-lg p-6">
-          <div className="flex justify-between">
-            <h2 className="text-2xl font-semibold mb-4">Eligible Courses</h2>
-
-            {/* category filter */}
+          <div className="justify-between">
+            <h2 className="text-2xl font-semibold">Eligible Courses</h2>
             <div className="mb-4">
-              <label htmlFor="category-filter" className="text-black font-semibold mb-2 mr-2">
+              <label htmlFor="category-filter" className="text-black/70 font-medium mb-2 mr-2">
                 Filter by Category:
               </label>
               <select
@@ -127,18 +125,18 @@ export default function Home() {
               </select>
             </div>
           </div>
+          <hr className="mb-4" />
           <ul className="space-y-2">
             {filteredEligibleCourses.map((course) => (
               <li key={course.code} className="text-gray-700">
-                <span className="font-bold">{course.code}</span>
-                <span>: {course.name}</span>
+                <span className="font-bold">{course.code}</span>: {course.name}
               </li>
             ))}
           </ul>
           <div className="mt-6">
             <button
               onClick={fetchEligibleCourses}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+              className="w-full bg-black hover:bg-zinc-800 text-white font-semibold py-2 px-4 rounded-lg"
             >
               Check Eligible Courses
             </button>

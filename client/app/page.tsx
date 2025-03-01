@@ -1,23 +1,41 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import Nav from '../app/components/Nav'
+import Image from "next/image"
+import Hero_Img from '../public/hero_img.png'
+
 export default function Home() {
 
   return (
     <div className="min-h-screen bg-white p-6 text-black flex items-center">
-      <div className="">
-        <h2 className="text-6xl font-bold ml-28">
-          Plan Your Next Semester!
-        </h2>
-        <p className="text-black/60 ml-28 mt-1">
-          Use our course planner to figure out your courses for the next semester based on completed courses.
-        </p>
-        <div className="mt-5">
-          <a className="text-white bg-black/80 rounded-md px-4 py-2 text-s hover:bg-black/70 ml-28 cursor-pointer" href="/checkCourse">
-            Find my courses -{'>'}
-          </a>
-          <a className="text-black border border-solid hover:bg-black/5 rounded-md px-4 py-2 text-s ml-5 cursor-pointer" href="/checkCourse">
-            GitHub Repo
-          </a>
+      <Nav />
+      <section className="pt-24 pb-12 ml-14 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center">
+          <div className="lg:w-1/2 lg:pr-8">
+            <h1 className="text-6xl font-bold mb-4">Organize your academic life with ease</h1>
+            <p className="text-xl text-zinc-500 mb-8">
+              Keep your academy journey on track with Acadions powerful planning tools
+            </p>
+            <div className="flex space-x-6">
+              <Button className="bg-black hover:bg-gray-800 text-white text-md py-4 px-5">
+                <Link href='/sign-up'>Get Started</Link>
+              </Button>
+              <Button variant="outline" className="text-md py-4 px-4">
+                <Link href='/Catalog'>Check out courses</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="lg:w-1/2 mt-8 lg:mt-0">
+            <Image
+              src={Hero_Img}
+              alt="Acadion dashboard preview"
+              width={800}
+              height={400}
+              className="rounded-lg shadow-lg -skew-x-6"
+            />
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
