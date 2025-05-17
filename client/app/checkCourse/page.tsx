@@ -14,14 +14,14 @@ interface Course {
 }
 
 export default function Home() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isSignedIn) {
+    if (isLoaded && !isSignedIn) {
       router.push('/sign-in');
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, isLoaded, router]);
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [completed, setCompleted] = useState<string[]>([]);
@@ -29,34 +29,48 @@ export default function Home() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
-  const fetchCourses = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/api/courses");
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setCourses(data);
-        setCategories(Array.from(new Set(data.map((course) => course.category))));
-      } else {
-        console.error("API returned invalid data:", data);
-        setCourses([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch courses:", error);
-    }
-  };
+  useEffect(() => {
+    fetch("/api/courses")
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Server Error: ${res.status} ${text}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCourses(data);
+          setCategories(Array.from(new Set(data.map((course) => course.category))));
+        } else {
+          console.error("API returned invalid data:", data);
+          setCourses([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching courses:", error);
+      });
+  }, []);
 
   const fetchEligibleCourses = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/api/eligible", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completed_courses: completed }),
+    fetch("/api/eligible", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed_courses: completed }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Server Error: ${res.status} ${text}`);
+        }
+        return res.json();
+      })
+      .then((data: Course[]) => {
+        setEligibleCourses(data);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch eligible courses:", error);
       });
-      const data: Course[] = await res.json();
-      setEligibleCourses(data);
-    } catch (error) {
-      console.error("Failed to fetch eligible courses:", error);
-    }
   };
 
   const toggleCourse = (courseCode: string) => {
@@ -66,10 +80,6 @@ export default function Home() {
         : [...prev, courseCode]
     );
   };
-
-  useEffect(() => {
-    fetchCourses();
-  }, []);
 
   const filteredEligibleCourses = selectedCategory
     ? eligibleCourses.filter((course) => course.category === selectedCategory)

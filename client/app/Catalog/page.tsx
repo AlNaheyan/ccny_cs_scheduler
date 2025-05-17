@@ -18,9 +18,15 @@ export default function CoursesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/courses") // Update with your backend URL
-      .then((res) => res.json())
-      .then((data) => setCourses(data))
+    fetch("/api/courses")
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Server Error: ${res.status} ${text}`);
+        }
+        return res.json();
+      })
+      .then(setCourses)
       .catch((error) => console.error("Error fetching courses:", error));
   }, []);
 
