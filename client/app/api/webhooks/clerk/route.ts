@@ -8,7 +8,9 @@ interface ClerkEvent {
   type: 'user.created' | 'user.updated' | string;
   data: {
     id: string;
-    email_address: string;
+    email_addresses: {
+        email_address: string;
+    }[];
     first_name?: string;
     last_name?: string;
     image_url?: string; // Clerk profile image
@@ -35,8 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = data.id;
-    const email = data.email_address ?? '';
-    const name = `${data.first_name ?? ''} ${data.last_name ?? ''}`.trim();
+    const email = data.email_addresses?.[0]?.email_address ?? '';    const name = `${data.first_name ?? ''} ${data.last_name ?? ''}`.trim();
     const avatar_url = data.image_url ?? '';
 
     const { error } = await supabase
