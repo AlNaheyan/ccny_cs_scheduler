@@ -12,7 +12,7 @@ export async function GET() {
   const { data, error } = await supabase.from('courses').select('*');
 
   if (error) {
-    console.error('❌ Supabase fetch error:', error);
+    console.error(' Supabase fetch error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

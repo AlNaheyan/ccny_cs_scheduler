@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import Nav from "../components/Nav";
+import Nav from "../../components/Nav";
 
 interface Course {
   code: string;

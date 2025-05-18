@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 import { CircleUser } from "lucide-react"
-import Logo from '../../public/acadion_icon1.png'
+import Logo from '../public/acadion_icon1.png'
 import Link from "next/link"
 import Image from "next/image"
 

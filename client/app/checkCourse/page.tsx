@@ -1,6 +1,6 @@
 'use client'
 
-import Nav from '../components/Nav'
+import Nav from '../../components/Nav'
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";

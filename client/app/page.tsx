@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Nav from '../app/components/Nav'
+import Nav from '../components/Nav'
 import Image from "next/image"
 import Hero_Img from '../public/hero_img.png'
 
