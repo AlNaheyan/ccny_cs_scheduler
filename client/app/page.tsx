@@ -1,10 +1,26 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Nav from '../components/Nav'
 import Image from "next/image"
 import Hero_Img from '../public/hero_img.png'
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
+  const handleGetStared = () => {
+    if (!isLoaded) return;
+
+    if (isSignedIn && isLoaded) {
+      router.push('Catalog')
+    } else {
+      router.push('/sign-up')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white p-6 text-black flex items-center">
@@ -17,8 +33,8 @@ export default function Home() {
               Keep your academy journey on track with Acadions powerful planning tools
             </p>
             <div className="flex space-x-6">
-              <Button className="bg-black hover:bg-gray-800 text-white text-md py-4 px-5">
-                <Link href='/sign-up'>Get Started</Link>
+              <Button onClick={handleGetStared} className="bg-black hover:bg-gray-800 text-white text-md py-4 px-5">
+                Get Started
               </Button>
               <Button variant="outline" className="text-md py-4 px-4">
                 <Link href='/Catalog'>Check out courses</Link>
