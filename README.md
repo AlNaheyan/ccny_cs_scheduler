@@ -3,5 +3,5 @@ If you're a CS student at CCNY and figuring out your courses for the next semest
 This tool includes a course catalog with each course's detail and a course finder for upcoming semester.  
 
 ## Tech Stack:
-#### Next.js, Flask, TailwindCSS, Supabase, PostgreSQL, Clerk
+#### Next.js, TailwindCSS, Supabase, PostgreSQL, Clerk
 
