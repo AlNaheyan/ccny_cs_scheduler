@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = data.id;
-    const email = data.email_addresses?.[0]?.email_address ?? '';    const name = `${data.first_name ?? ''} ${data.last_name ?? ''}`.trim();
+    const email = data.email_addresses?.[0]?.email_address ?? '';   
+    const name = `${data.first_name ?? ''} ${data.last_name ?? ''}`.trim();
     const avatar_url = data.image_url ?? '';
 
     const { error } = await supabase
