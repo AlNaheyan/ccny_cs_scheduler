@@ -29,6 +29,9 @@ export default function Nav() {
               <Button variant='link' className="font-semibold text-sm">
                 <Link href='/Catalog'>Courses</Link>
               </Button>
+              <Button variant='link' className="font-semibold text-sm">
+                <Link href='/profile'>Profile</Link>
+              </Button>
             </div>
             <SignedOut>
               <SignInButton>
@@ -40,7 +43,7 @@ export default function Nav() {
 
             <SignedIn>
               {/* You can place User related buttons or links here */}
-              <UserButton />
+              <UserButton userProfileUrl="/profile" />
             </SignedIn>
           </div>
         </div>

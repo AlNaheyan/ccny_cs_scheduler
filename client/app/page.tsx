@@ -16,7 +16,7 @@ export default function Home() {
     if (!isLoaded) return;
 
     if (isSignedIn && isLoaded) {
-      router.push('Catalog')
+      router.push('checkCourse')
     } else {
       router.push('/sign-up')
     }
