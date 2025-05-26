@@ -13,7 +13,7 @@ interface ClerkEvent {
     }[];
     first_name?: string;
     last_name?: string;
-    image_url?: string; // Clerk profile image
+    image_url?: string; 
   };
 }
 

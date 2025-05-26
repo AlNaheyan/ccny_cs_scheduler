@@ -17,17 +17,34 @@ export default function Home() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [eligibleCourses, setEligibleCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       router.push('/sign-in');
     }
   }, [isSignedIn, isLoaded, router]);
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [completed, setCompleted] = useState<string[]>([]);
-  const [eligibleCourses, setEligibleCourses] = useState<Course[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  useEffect (() => {
+    const fetchSavedCourses = async () => {
+      const res = await fetch('/api/saved-courses');
+      if (!res.ok) {
+        console.error("Failed to fetch saved vourses")
+        return;
+      }
+      const data = await res.json();
+      if (Array.isArray(data?.courses)) {
+        setCompleted(data.courses);
+      }
+    };
+    if (isSignedIn && isLoaded) {
+      fetchSavedCourses();
+    }
+  },[isSignedIn, isLoaded]);
 
   useEffect(() => {
     fetch("/api/courses")

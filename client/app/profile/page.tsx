@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Notebook, BookCheck } from "lucide-react";
 
 interface UserProfile {
   name: string;
@@ -26,9 +26,12 @@ interface Course {
 export default function ProfilePage() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
+  const [completedCourseCodes, setCompletedCourseCodes] = useState<string[]>([]);
+  const [completedCourses, setCompletedCourses] = useState<Course[]>([]);
   const [search, setSearch] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -51,11 +54,9 @@ export default function ProfilePage() {
       if (data?.name) {
         setProfile(data);
       } else {
-        console.warn("No profile data found");
         setProfile(null);
       }
     };
-
     if (isLoaded && isSignedIn) {
       fetchProfile();
     }
@@ -71,6 +72,34 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
+    const fetchSavedCourses = async () => {
+      const res = await fetch("/api/saved-courses");
+      if (!res.ok) {
+        console.error("Failed to fetch saved courses");
+        return;
+      }
+      const data = await res.json();
+      if (Array.isArray(data?.courses)) {
+        setCompletedCourseCodes(data.courses);
+      } else {
+        console.error("no courses found in res", data)
+      }
+    };
+    if (isLoaded && isSignedIn) {
+      fetchSavedCourses();
+    }
+  }, [isLoaded, isSignedIn]);
+
+  useEffect(() => {
+    if (allCourses.length > 0 && completedCourseCodes.length > 0) {
+      const matched = allCourses.filter(course =>
+        completedCourseCodes.includes(course.code)
+      );
+      setCompletedCourses(matched);
+    }
+  }, [allCourses, completedCourseCodes]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
@@ -81,7 +110,6 @@ export default function ProfilePage() {
         setShowOptions(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -102,14 +130,35 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSave = async () => {
+    const courseCodes = selectedCourses.map((c) => c.code);
+    try {
+      const res = await fetch("/api/saved-courses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ courses: courseCodes }),
+      });
+
+      if (!res.ok) {
+        const errorBody = await res.json();
+        console.error("Failed to save courses:", errorBody.error || res.statusText);
+      } else {
+        console.log("Courses saved successfully");
+      }
+    } catch (error) {
+      console.error("Network or parsing error:", error);
+    }
+  };
+
   if (!isSignedIn) return null;
 
   return (
     <div className="min-h-screen bg-white p-10 pt-10 text-black">
       <Nav />
-
       <div className="max-w-5xl mx-auto mt-20">
-        <h1 className="text-4xl font-bold mb-6">Student Profile</h1>
+        <h1 className="text-4xl font-bold mb-6">Profile</h1>
 
         {!profile ? (
           <Card className="w-full">
@@ -130,15 +179,11 @@ export default function ProfilePage() {
                 />
                 <div className="space-y-3">
                   <div>
-                    <span className="text-sm font-semibold text-black/70">
-                      Name
-                    </span>
+                    <span className="text-sm font-semibold text-black/70">Name</span>
                     <p className="text-xl font-bold">{profile.name}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-black/70">
-                      Email
-                    </span>
+                    <span className="text-sm font-semibold text-black/70">Email</span>
                     <p className="text-lg">{profile.email}</p>
                   </div>
                 </div>
@@ -149,14 +194,10 @@ export default function ProfilePage() {
 
         <Card className="w-full mt-6">
           <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Completed Courses</h2>
-
+            <h2 className="text-2xl font-bold mb-4">Student Progress</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <p className="text-black/80 mb-3">
-                  Search and select courses you&apos;ve completed:
-                </p>
-
+                <p className="text-black/80 mb-3">Search and select courses you have completed:</p>
                 <div className="relative">
                   <Input
                     placeholder="Search courses..."
@@ -169,7 +210,7 @@ export default function ProfilePage() {
                   {showOptions && (
                     <div
                       ref={dropdownRef}
-                      className=" p-2 absolute z-10 w-full max-h-80 overflow-y-auto bg-white border rounded-md shadow-md"
+                      className="p-2 absolute z-10 w-full max-h-80 overflow-y-auto bg-white border rounded-md shadow-md"
                     >
                       {filteredCourses.map((course) => (
                         <div
@@ -179,81 +220,84 @@ export default function ProfilePage() {
                               ? "bg-gray-200 rounded-md"
                               : ""
                           }`}
-                          onClick={() => {
-                            toggleCourse(course);
-                          }}
+                          onClick={() => toggleCourse(course)}
                         >
-                          <span className="font-medium">{course.code}</span> -{" "}
-                          {course.name}
+                          <span className="font-medium">{course.code}</span> - {course.name}
                         </div>
                       ))}
                       {filteredCourses.length === 0 && (
-                        <p className="text-sm text-gray-500 p-2">
-                          No results found.
-                        </p>
+                        <p className="text-sm text-gray-500 p-2">No results found.</p>
                       )}
                     </div>
                   )}
                 </div>
-
-                <div className="mt-4 text-sm text-gray-500">
-                  <p>
-                    Search by course code or name and select from the dropdown.
-                  </p>
-                  <p>
-                    Click on a course to add it to your completed courses list.
-                  </p>
+                <div className="mt-5">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold">Selected Courses:</h3>
+                    <span className="text-sm text-gray-500">{selectedCourses.length} courses selected</span>
+                  </div>
+                  {selectedCourses.length > 0 ? (
+                    <div className="border rounded-md overflow-hidden">
+                      <div className="max-h-80 overflow-y-auto">
+                        {selectedCourses.map((course) => (
+                          <div
+                            key={course.code}
+                            className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50"
+                          >
+                            <div className="flex gap-3">
+                              <Notebook size={18} />
+                              <div className="text-sm text-gray-600">{course.name}</div>
+                            </div>
+                            <button
+                              onClick={() => toggleCourse(course)}
+                              className="text-gray-400 hover:text-red-500 p-1"
+                              aria-label={`Remove ${course.code}`}
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border rounded-md p-8 text-center text-gray-500">
+                      <p>No courses selected yet.</p>
+                      <p className="text-sm mt-1">Search and select courses from the left panel.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-center mt-8">
+                  <Button
+                    onClick={handleSave}
+                    className="bg-black hover:bg-zinc-800 text-white font-semibold py-2 px-8 rounded-lg"
+                  >
+                    Save Completed Courses
+                  </Button>
                 </div>
               </div>
-
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-semibold">Selected Courses:</h3>
-                  <span className="text-sm text-gray-500">
-                    {selectedCourses.length} courses selected
-                  </span>
-                </div>
-
-                {selectedCourses.length > 0 ? (
+                <h3 className="font-semibold mb-2">Completed Courses:</h3>
+                {completedCourses.length > 0 ? (
                   <div className="border rounded-md overflow-hidden">
                     <div className="max-h-80 overflow-y-auto">
-                      {selectedCourses.map((course) => (
+                      {completedCourses.map((course) => (
                         <div
                           key={course.code}
-                          className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50"
+                          className="flex items-center gap-3 p-3 border-b last:border-b-0 hover:bg-gray-50"
                         >
+                          <BookCheck size={18} />
                           <div>
-                            <div className="font-medium">{course.code}</div>
-                            <div className="text-sm text-gray-600">
-                              {course.name}
-                            </div>
+                            <div className="font-medium">{course.name}</div>
+                            <div className="text-sm text-gray-600">{course.code}</div>
                           </div>
-                          <button
-                            onClick={() => toggleCourse(course)}
-                            className="text-gray-400 hover:text-red-500 p-1"
-                            aria-label={`Remove ${course.code}`}
-                          >
-                            <X size={18} />
-                          </button>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="border rounded-md p-8 text-center text-gray-500">
-                    <p>No courses selected yet.</p>
-                    <p className="text-sm mt-1">
-                      Search and select courses from the left panel.
-                    </p>
-                  </div>
+                  <p className="text-sm text-gray-500">No completed courses saved yet.</p>
                 )}
               </div>
-            </div>
-
-            <div className="flex justify-center mt-8">
-              <Button className="bg-black hover:bg-zinc-800 text-white font-semibold py-2 px-8 rounded-lg">
-                Save Completed Courses
-              </Button>
             </div>
           </CardContent>
         </Card>
