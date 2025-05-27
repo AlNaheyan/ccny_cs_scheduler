@@ -30,12 +30,17 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
-  const [completedCourseCodes, setCompletedCourseCodes] = useState<string[]>([]);
+  const [completedCourseCodes, setCompletedCourseCodes] = useState<string[]>(
+    []
+  );
   const [completedCourses, setCompletedCourses] = useState<Course[]>([]);
   const [search, setSearch] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -82,7 +87,7 @@ export default function ProfilePage() {
       if (Array.isArray(data?.courses)) {
         setCompletedCourseCodes(data.courses);
       } else {
-        console.error("no courses found in res", data)
+        console.error("no courses found in res", data);
       }
     };
     if (isLoaded && isSignedIn) {
@@ -92,7 +97,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (allCourses.length > 0 && completedCourseCodes.length > 0) {
-      const matched = allCourses.filter(course =>
+      const matched = allCourses.filter((course) =>
         completedCourseCodes.includes(course.code)
       );
       setCompletedCourses(matched);
@@ -116,11 +121,11 @@ export default function ProfilePage() {
     };
   }, []);
 
-  const filteredCourses = allCourses.filter(
-    (course) =>
+  const filteredCourses = allCourses
+    .filter((course) =>
       course.name.toLowerCase().includes(search.toLowerCase()) ||
       course.code.toLowerCase().includes(search.toLowerCase())
-  );
+  ).filter((course) => !completedCourseCodes.includes(course.code));
 
   const toggleCourse = (course: Course) => {
     if (selectedCourses.find((c) => c.code === course.code)) {
@@ -132,6 +137,21 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     const courseCodes = selectedCourses.map((c) => c.code);
+    const newCourses = courseCodes.filter(
+      (code) => !completedCourseCodes.includes(code)
+    );
+
+    if (newCourses.length === 0) {
+      setSaveStatus("No new courses to save.");
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
+    const updatedCourseList = [...completedCourseCodes, ...newCourses];
+
+    setIsSaving(true);
+    setSaveStatus(null);
+
     try {
       const res = await fetch("/api/saved-courses", {
         method: "POST",
@@ -143,12 +163,23 @@ export default function ProfilePage() {
 
       if (!res.ok) {
         const errorBody = await res.json();
-        console.error("Failed to save courses:", errorBody.error || res.statusText);
+        console.error(
+          "Failed to save courses:",
+          errorBody.error || res.statusText
+        );
+        setSaveStatus("Failed to Save selected courses!");
       } else {
         console.log("Courses saved successfully");
+        setCompletedCourseCodes(updatedCourseList);
+        setSaveStatus("Selected courses have been saved as completed!");
+        setSelectedCourses([]);
       }
     } catch (error) {
       console.error("Network or parsing error:", error);
+      setSaveStatus("Error wheil saving your courses!");
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveStatus(null), 3000);
     }
   };
 
@@ -179,11 +210,15 @@ export default function ProfilePage() {
                 />
                 <div className="space-y-3">
                   <div>
-                    <span className="text-sm font-semibold text-black/70">Name</span>
+                    <span className="text-sm font-semibold text-black/70">
+                      Name
+                    </span>
                     <p className="text-xl font-bold">{profile.name}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-black/70">Email</span>
+                    <span className="text-sm font-semibold text-black/70">
+                      Email
+                    </span>
                     <p className="text-lg">{profile.email}</p>
                   </div>
                 </div>
@@ -197,7 +232,9 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold mb-4">Student Progress</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <p className="text-black/80 mb-3">Search and select courses you have completed:</p>
+                <p className="text-black/80 mb-3">
+                  Search and select courses you have completed:
+                </p>
                 <div className="relative">
                   <Input
                     placeholder="Search courses..."
@@ -222,11 +259,14 @@ export default function ProfilePage() {
                           }`}
                           onClick={() => toggleCourse(course)}
                         >
-                          <span className="font-medium">{course.code}</span> - {course.name}
+                          <span className="font-medium">{course.code}</span> -{" "}
+                          {course.name}
                         </div>
                       ))}
                       {filteredCourses.length === 0 && (
-                        <p className="text-sm text-gray-500 p-2">No results found.</p>
+                        <p className="text-sm text-gray-500 p-2">
+                          No results found.
+                        </p>
                       )}
                     </div>
                   )}
@@ -234,7 +274,9 @@ export default function ProfilePage() {
                 <div className="mt-5">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-semibold">Selected Courses:</h3>
-                    <span className="text-sm text-gray-500">{selectedCourses.length} courses selected</span>
+                    <span className="text-sm text-gray-500">
+                      {selectedCourses.length} courses selected
+                    </span>
                   </div>
                   {selectedCourses.length > 0 ? (
                     <div className="border rounded-md overflow-hidden">
@@ -246,7 +288,9 @@ export default function ProfilePage() {
                           >
                             <div className="flex gap-3">
                               <Notebook size={18} />
-                              <div className="text-sm text-gray-600">{course.name}</div>
+                              <div className="text-sm text-gray-600">
+                                {course.name}
+                              </div>
                             </div>
                             <button
                               onClick={() => toggleCourse(course)}
@@ -262,18 +306,26 @@ export default function ProfilePage() {
                   ) : (
                     <div className="border rounded-md p-8 text-center text-gray-500">
                       <p>No courses selected yet.</p>
-                      <p className="text-sm mt-1">Search and select courses from the left panel.</p>
+                      <p className="text-sm mt-1">
+                        Search and select courses from the searchbar.
+                      </p>
                     </div>
                   )}
                 </div>
                 <div className="flex justify-center mt-8">
                   <Button
                     onClick={handleSave}
+                    disabled={isSaving}
                     className="bg-black hover:bg-zinc-800 text-white font-semibold py-2 px-8 rounded-lg"
                   >
-                    Save Completed Courses
+                    {isSaving ? "Saving.." : "Save Courses"}
                   </Button>
                 </div>
+                {saveStatus && (
+                    <p className={`text-center mt-3 font-bold text-sm ${saveStatus.includes("Failed") ? "text-red-500" : "text-green-600"}`}>
+                      {saveStatus}
+                    </p>
+                  )}
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Completed Courses:</h3>
@@ -288,14 +340,18 @@ export default function ProfilePage() {
                           <BookCheck size={18} />
                           <div>
                             <div className="font-medium">{course.name}</div>
-                            <div className="text-sm text-gray-600">{course.code}</div>
+                            <div className="text-sm text-gray-600">
+                              {course.code}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No completed courses saved yet.</p>
+                  <p className="text-sm text-gray-500">
+                    No completed courses saved yet.
+                  </p>
                 )}
               </div>
             </div>
