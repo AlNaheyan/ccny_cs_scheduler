@@ -158,7 +158,7 @@ export default function ProfilePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ courses: courseCodes }),
+        body: JSON.stringify({ courses: updatedCourseList }),
       });
 
       if (!res.ok) {
