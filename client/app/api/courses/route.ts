@@ -6,6 +6,8 @@ interface Course {
   name: string;
   category: string;
   prerequisites: string[];
+  credits: number | null;
+  description: string | null;
 }
 
 export async function GET() {
