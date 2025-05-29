@@ -21,6 +21,7 @@ interface Course {
   name: string;
   prerequisites: string[];
   category: string;
+  credits: number | null;
 }
 
 export default function ProfilePage() {
@@ -183,6 +184,10 @@ export default function ProfilePage() {
     }
   };
 
+  const totalCredits = completedCourses.reduce((sum, course) => {
+    return sum + (course.credits ?? 0);
+  }, 0)
+
   if (!isSignedIn) return null;
 
   return (
@@ -213,13 +218,13 @@ export default function ProfilePage() {
                     <span className="text-sm font-semibold text-black/70">
                       Name
                     </span>
-                    <p className="text-xl font-bold">{profile.name}</p>
+                    <p className="text-xl font-semibold">{profile.name}</p>
                   </div>
                   <div>
                     <span className="text-sm font-semibold text-black/70">
                       Email
                     </span>
-                    <p className="text-lg">{profile.email}</p>
+                    <p className="text-lg font-semibold">{profile.email}</p>
                   </div>
                 </div>
               </div>
@@ -329,6 +334,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Completed Courses:</h3>
+                <div className="mb-3 text-sm text-gray-900 font-medium">
+                  Total credits earned: <span className="text-black"> {totalCredits}</span>
+                </div>
                 {completedCourses.length > 0 ? (
                   <div className="border rounded-md overflow-hidden">
                     <div className="max-h-80 overflow-y-auto">
