@@ -3,4 +3,4 @@ Acadion helps CCNY CS students plan their next semester by browsing a complete, 
 
 Check it out: https://ccny-cs-scheduler.vercel.app/
 
-Nextjs, TypeScript, PostgreSQL, Node.js, Clerk
+Nextjs, TypeScript, PostgreSQL, Node.js, Clerk, Supabase
