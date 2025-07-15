@@ -1,0 +1,9 @@
+{
+    "cron": [
+        {
+            "path": "/api/cron",
+            "schedule": "0 */12 * * *",
+            "timezone": "America/New_York"
+        }                       
+    ]
+}
