@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Nav from "../components/Nav"
@@ -13,11 +14,16 @@ export default function Home() {
   const { isSignedIn, isLoaded } = useUser()
   const router = useRouter()
 
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace("/Catalog")
+    }
+  }, [isLoaded, isSignedIn, router])
+
   const handleGetStared = () => {
     if (!isLoaded) return
-
-    if (isSignedIn && isLoaded) {
-      router.push("checkCourse")
+    if (isSignedIn) {
+      router.push("/Catalog")
     } else {
       router.push("/sign-up")
     }
