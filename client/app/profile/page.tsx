@@ -14,6 +14,8 @@ interface UserProfile {
   name: string;
   avatar_url: string;
   email: string;
+  college_year?: string;
+  major?: string;
 }
 
 interface Course {
@@ -126,7 +128,7 @@ export default function ProfilePage() {
     .filter((course) =>
       course.name.toLowerCase().includes(search.toLowerCase()) ||
       course.code.toLowerCase().includes(search.toLowerCase())
-  ).filter((course) => !completedCourseCodes.includes(course.code));
+    ).filter((course) => !completedCourseCodes.includes(course.code));
 
   const toggleCourse = (course: Course) => {
     if (selectedCourses.find((c) => c.code === course.code)) {
@@ -204,28 +206,41 @@ export default function ProfilePage() {
           </Card>
         ) : (
           <Card className="w-full">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <CardContent className="p-8">
+              <div className="flex items-start gap-6">
+                {/* Profile Picture */}
                 <Image
                   src={profile.avatar_url || "/placeholder.svg"}
                   alt="Profile"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                  width={128}
+                  height={128}
+                  className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-md"
                 />
-                <div className="space-y-3">
+
+                {/* Profile Info */}
+                <div className="flex-1 space-y-4 pt-2">
                   <div>
-                    <span className="text-sm font-semibold text-black/70">
-                      Name
-                    </span>
-                    <p className="text-xl font-semibold">{profile.name}</p>
+                    <h2 className="text-2xl font-bold text-black">{profile.name}</h2>
+                    <p className="text-gray-600">{profile.email}</p>
                   </div>
-                  <div>
-                    <span className="text-sm font-semibold text-black/70">
-                      Email
-                    </span>
-                    <p className="text-lg font-semibold">{profile.email}</p>
-                  </div>
+
+                  {/* Stats Grid */}
+                  {(profile.college_year || profile.major) && (
+                    <div className="flex gap-8 pt-2">
+                      {profile.major && (
+                        <div>
+                          <p className="text-sm text-gray-500">Major</p>
+                          <p className="font-semibold text-black">{profile.major}</p>
+                        </div>
+                      )}
+                      {profile.college_year && (
+                        <div>
+                          <p className="text-sm text-gray-500">Year</p>
+                          <p className="font-semibold text-black">{profile.college_year}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -257,11 +272,10 @@ export default function ProfilePage() {
                       {filteredCourses.map((course) => (
                         <div
                           key={course.code}
-                          className={`p-2 cursor-pointer hover:bg-gray-100 hover:rounded-md ${
-                            selectedCourses.find((c) => c.code === course.code)
-                              ? "bg-gray-200 rounded-md"
-                              : ""
-                          }`}
+                          className={`p-2 cursor-pointer hover:bg-gray-100 hover:rounded-md ${selectedCourses.find((c) => c.code === course.code)
+                            ? "bg-gray-200 rounded-md"
+                            : ""
+                            }`}
                           onClick={() => toggleCourse(course)}
                         >
                           <span className="font-medium">{course.code}</span> -{" "}
@@ -327,10 +341,10 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 {saveStatus && (
-                    <p className={`text-center mt-3 font-bold text-sm ${saveStatus.includes("Failed") ? "text-red-500" : "text-green-600"}`}>
-                      {saveStatus}
-                    </p>
-                  )}
+                  <p className={`text-center mt-3 font-bold text-sm ${saveStatus.includes("Failed") ? "text-red-500" : "text-green-600"}`}>
+                    {saveStatus}
+                  </p>
+                )}
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Completed Courses:</h3>
