@@ -17,6 +17,20 @@ interface Course {
   category: string
 }
 
+interface UserProfile {
+  major?: string
+}
+
+// Map majors to course code prefixes
+const majorToCoursePrefix: Record<string, string[]> = {
+  "Computer Science": ["CSC", "CS"],
+  "Mathematics": ["MATH", "MTH"],
+  "Mechanical Engineering": ["ME", "MECH"],
+  "Chemical Engineering": ["CHE", "CHEM"],
+  "Civil Engineering": ["CE", "CIV"],
+  "Electrical Engineering": ["EE", "ECE", "ELEC"],
+}
+
 export default function EligibleRevampedPage() {
   const { isSignedIn, isLoaded } = useUser()
   const router = useRouter()
@@ -28,12 +42,27 @@ export default function EligibleRevampedPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [searchCompleted, setSearchCompleted] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [userMajor, setUserMajor] = useState<string | null>(null)
+  const [showAllMajors, setShowAllMajors] = useState(false)
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       router.push("/sign-in")
     }
   }, [isSignedIn, isLoaded, router])
+
+  // Fetch user profile to get major
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const res = await fetch("/api/profile")
+      if (!res.ok) return
+      const data: UserProfile = await res.json()
+      setUserMajor(data.major || null)
+    }
+    if (isSignedIn && isLoaded) {
+      fetchProfile()
+    }
+  }, [isSignedIn, isLoaded])
 
   useEffect(() => {
     const fetchSavedCourses = async () => {
@@ -52,7 +81,10 @@ export default function EligibleRevampedPage() {
     }
   }, [isSignedIn, isLoaded])
 
+  // Fetch courses - filtered by major initially
   useEffect(() => {
+    if (!userMajor) return // Wait for user major to load
+
     fetch("/api/courses")
       .then(async (res) => {
         if (!res.ok) {
@@ -63,8 +95,10 @@ export default function EligibleRevampedPage() {
       })
       .then((data) => {
         if (Array.isArray(data)) {
-          setCourses(data)
-          setCategories(Array.from(new Set(data.map((course) => course.category))))
+          // Filter courses by user's major unless "Show All" is clicked
+          const filteredCourses = showAllMajors ? data : filterCoursesByMajor(data, userMajor)
+          setCourses(filteredCourses)
+          setCategories(Array.from(new Set(filteredCourses.map((course) => course.category))))
         } else {
           console.error("API returned invalid data:", data)
           setCourses([])
@@ -73,7 +107,15 @@ export default function EligibleRevampedPage() {
       .catch((error) => {
         console.error("Error fetching courses:", error)
       })
-  }, [])
+  }, [userMajor, showAllMajors])
+
+  const filterCoursesByMajor = (allCourses: Course[], major: string): Course[] => {
+    const prefixes = majorToCoursePrefix[major] || []
+    if (prefixes.length === 0) return allCourses // If major not mapped, show all
+    return allCourses.filter(course =>
+      prefixes.some(prefix => course.code.toUpperCase().startsWith(prefix.toUpperCase()))
+    )
+  }
 
   const fetchEligibleCourses = async () => {
     setIsLoading(true)
@@ -118,25 +160,47 @@ export default function EligibleRevampedPage() {
     <div className="min-h-screen bg-gray-50 p-10 pt-15">
       <Nav />
 
-      {/* Header */}
-      <div className="mb-8 mt-16">
-        <div className="flex items-center gap-3 mb-4">
-          <Target className="w-8 h-8" />
-          <h1 className="text-4xl font-bold">Academic Path Planner</h1>
-        </div>
-        <p className="text-gray-600 text-lg">Plan your next semester based on completed courses</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 mt-16 gap-8">
         {/* Completed Courses Section */}
         <Card className="h-fit">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-6 h-6 text-zinc-900" />
               <h2 className="text-2xl font-semibold">Completed Courses</h2>
             </div>
 
             <p className="text-gray-600 mb-4">Mark the courses you have completed ({completed.length} selected)</p>
+
+            {/* Show/Hide All Courses Button */}
+            {userMajor && (
+              <div className="mb-4">
+                {!showAllMajors ? (
+                  <>
+                    <Button
+                      onClick={() => setShowAllMajors(true)}
+                      variant="outline"
+                      className="w-full border-dashed border-2 hover:bg-gray-100"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Show courses from other majors
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-1">Currently showing {userMajor} courses only</p>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => setShowAllMajors(false)}
+                      variant="outline"
+                      className="w-full bg-blue-50 border-blue-200 hover:bg-blue-100"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Hide courses from other majors
+                    </Button>
+                    <p className="text-xs text-blue-600 mt-1">✓ Showing all courses from all majors</p>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Search for completed courses */}
             <div className="mb-4">
@@ -173,9 +237,8 @@ export default function EligibleRevampedPage() {
                       {categoryCoursesFiltered.map((course) => (
                         <div
                           key={course.code}
-                          className={`flex items-center space-x-3 p-3 rounded transition-colors ${
-                            completed.includes(course.code) ? "bg-gray-200" : "bg-white hover:bg-gray-100"
-                          }`}
+                          className={`flex items-center space-x-3 p-3 rounded transition-colors ${completed.includes(course.code) ? "bg-gray-200" : "bg-white hover:bg-gray-100"
+                            }`}
                         >
                           <Checkbox
                             checked={completed.includes(course.code)}
@@ -200,7 +263,7 @@ export default function EligibleRevampedPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+                <BookOpen className="w-6 h-6 text-zinc-900" />
                 <h2 className="text-2xl font-semibold">Available Next Semester</h2>
               </div>
               <Button
@@ -254,7 +317,7 @@ export default function EligibleRevampedPage() {
                         </span>
                       </div>
                       <div className="text-sm text-gray-500">{course.category}</div>
-                      
+
                     </div>
                   ))}
                 </>

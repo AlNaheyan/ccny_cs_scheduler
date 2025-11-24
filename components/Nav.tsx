@@ -7,7 +7,7 @@ import Image from "next/image"
 
 export default function Nav() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border border-b-1 border-zinc-100 backdrop-blur-lg">
+    <nav className="fixed top-0 left-0 right-0 z-50 border border-b-1 border-zinc-200 backdrop-blur-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -23,13 +23,13 @@ export default function Nav() {
           </div>
           <div className="flex gap-10">
             <div className="flex justify-end">
-              <Button variant='link' className="font-semibold text-sm">
+              <Button variant='ghost' className="font-semibold text-sm">
                 <Link href='/checkCourse'> Find my courses</Link>
               </Button>
-              <Button variant='link' className="font-semibold text-sm">
+              <Button variant='ghost' className="font-semibold text-sm">
                 <Link href='/Catalog'>Courses</Link>
               </Button>
-              <Button variant='link' className="font-semibold text-sm">
+              <Button variant='ghost' className="font-semibold text-sm">
                 <Link href='/profile'>Profile</Link>
               </Button>
             </div>

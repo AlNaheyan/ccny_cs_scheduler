@@ -68,7 +68,7 @@ export default function Home() {
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-black">60+</div>
+                  <div className="text-2xl font-bold text-black">140+</div>
                   <div className="text-sm text-gray-600">Courses Available</div>
                 </div>
                 <div className="text-center">

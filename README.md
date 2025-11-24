@@ -1,6 +1,7 @@
 # Acadion
-Acadion helps CCNY CS students plan their next semester by browsing a complete, searchable course catalog and finding exactly the courses you need to graduate.
+If you're a CS student at CCNY and figuring out your courses for the next semester, use this tool to find the specific courses you are required to graduate.
+This tool includes a course catalog with each course's detail and a course finder for upcoming semester.  
 
-Check it out: https://acadion.alnaheyan.me/
+## Tech Stack:
+#### Next.js, Flask, TailwindCSS, Supabase, PostgreSQL, Clerk
 
-Tools: Nextjs, TypeScript, PostgreSQL, Node.js, Clerk, Supabase

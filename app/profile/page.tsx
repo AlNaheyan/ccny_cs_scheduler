@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Notebook, BookCheck } from "lucide-react";
+import { X, Notebook, BookCheck, Edit2, Check } from "lucide-react";
 
 interface UserProfile {
   name: string;
@@ -44,6 +44,10 @@ export default function ProfilePage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedMajor, setEditedMajor] = useState("");
+  const [editedYear, setEditedYear] = useState("");
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -61,6 +65,10 @@ export default function ProfilePage() {
       const data = await res.json();
       if (data?.name) {
         setProfile(data);
+        // Initialize edit fields
+        setEditedName(data.name || "");
+        setEditedMajor(data.major || "");
+        setEditedYear(data.college_year || "");
       } else {
         setProfile(null);
       }
@@ -186,6 +194,47 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    setSaveStatus(null);
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editedName,
+          major: editedMajor || null,
+          college_year: editedYear || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update profile");
+      }
+
+      const updatedProfile = await res.json();
+      setProfile(updatedProfile);
+      setIsEditingProfile(false);
+      setSaveStatus("Profile updated successfully!");
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setSaveStatus(error instanceof Error ? error.message : "Failed to update profile");
+      setTimeout(() => setSaveStatus(null), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
+    setEditedName(profile?.name || "");
+    setEditedMajor(profile?.major || "");
+    setEditedYear(profile?.college_year || "");
+  };
+
   const totalCredits = completedCourses.reduce((sum, course) => {
     return sum + (course.credits ?? 0);
   }, 0)
@@ -207,42 +256,144 @@ export default function ProfilePage() {
         ) : (
           <Card className="w-full">
             <CardContent className="p-8">
-              <div className="flex items-start gap-6">
-                {/* Profile Picture */}
-                <Image
-                  src={profile.avatar_url || "/placeholder.svg"}
-                  alt="Profile"
-                  width={128}
-                  height={128}
-                  className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-md"
-                />
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start gap-6 flex-1">
+                  {/* Profile Picture */}
+                  <Image
+                    src={profile.avatar_url || "/placeholder.svg"}
+                    alt="Profile"
+                    width={128}
+                    height={128}
+                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-200 shadow-md"
+                  />
 
-                {/* Profile Info */}
-                <div className="flex-1 space-y-4 pt-2">
-                  <div>
-                    <h2 className="text-2xl font-bold text-black">{profile.name}</h2>
-                    <p className="text-gray-600">{profile.email}</p>
+                  {/* Profile Info */}
+                  <div className="flex-1 space-y-4 pt-2">
+                    {!isEditingProfile ? (
+                      <>
+                        <div>
+                          <h2 className="text-2xl font-bold text-black">{profile.name}</h2>
+                          <p className="text-gray-600">{profile.email}</p>
+                        </div>
+
+                        {/* Stats Grid */}
+                        {(profile.college_year || profile.major) && (
+                          <div className="flex gap-8 pt-2">
+                            {profile.major && (
+                              <div>
+                                <p className="text-sm text-gray-500">Major</p>
+                                <p className="font-semibold text-black">{profile.major}</p>
+                              </div>
+                            )}
+                            {profile.college_year && (
+                              <div>
+                                <p className="text-sm text-gray-500">Year</p>
+                                <p className="font-semibold text-black">{profile.college_year}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {/* Edit Mode */}
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 mb-1 block">Name</label>
+                            <Input
+                              value={editedName}
+                              onChange={(e) => setEditedName(e.target.value)}
+                              placeholder="Your name"
+                              className="max-w-md"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 mb-1 block">Major</label>
+                            <select
+                              value={editedMajor}
+                              onChange={(e) => setEditedMajor(e.target.value)}
+                              className="max-w-md w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                            >
+                              <option value="">Select a major</option>
+                              <option value="Computer Science">Computer Science</option>
+                              <option value="Mathematics">Mathematics</option>
+                              <option value="Mechanical Engineering">Mechanical Engineering</option>
+                              <option value="Chemical Engineering">Chemical Engineering</option>
+                              <option value="Civil Engineering">Civil Engineering</option>
+                              <option value="Electrical Engineering">Electrical Engineering</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 mb-1 block">Year</label>
+                            <select
+                              value={editedYear}
+                              onChange={(e) => setEditedYear(e.target.value)}
+                              className="max-w-md w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                            >
+                              <option value="">Select year</option>
+                              <option value="Freshman">Freshman</option>
+                              <option value="Sophomore">Sophomore</option>
+                              <option value="Junior">Junior</option>
+                              <option value="Senior">Senior</option>
+                              <option value="Graduate">Graduate</option>
+                            </select>
+                          </div>
+
+                          <p className="text-sm text-gray-500">{profile.email}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
+                </div>
 
-                  {/* Stats Grid */}
-                  {(profile.college_year || profile.major) && (
-                    <div className="flex gap-8 pt-2">
-                      {profile.major && (
-                        <div>
-                          <p className="text-sm text-gray-500">Major</p>
-                          <p className="font-semibold text-black">{profile.major}</p>
-                        </div>
-                      )}
-                      {profile.college_year && (
-                        <div>
-                          <p className="text-sm text-gray-500">Year</p>
-                          <p className="font-semibold text-black">{profile.college_year}</p>
-                        </div>
-                      )}
-                    </div>
+                {/* Edit/Save Buttons */}
+                <div className="flex gap-2">
+                  {!isEditingProfile ? (
+                    <Button
+                      onClick={() => setIsEditingProfile(true)}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      Edit Profile
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={handleCancelEdit}
+                        variant="outline"
+                        size="sm"
+                        disabled={isSaving}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleSaveProfile}
+                        size="sm"
+                        className="bg-black hover:bg-gray-800 text-white flex items-center gap-2"
+                        disabled={isSaving || !editedName.trim()}
+                      >
+                        {isSaving ? (
+                          "Saving..."
+                        ) : (
+                          <>
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
+
+              {/* Save Status Message */}
+              {saveStatus && (
+                <div className={`mb-4 p-3 rounded-lg ${saveStatus.includes("successfully") ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+                  {saveStatus}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
