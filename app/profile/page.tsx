@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Notebook, BookCheck, Edit2, Check } from "lucide-react";
+import { X, Notebook, BookCheck } from "lucide-react";
 
 interface UserProfile {
   name: string;

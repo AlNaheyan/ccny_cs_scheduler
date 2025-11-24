@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { CheckCircle, BookOpen, Search, Target } from "lucide-react"
+import { CheckCircle, BookOpen, Search } from "lucide-react"
 
 interface Course {
   code: string
